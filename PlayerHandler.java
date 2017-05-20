@@ -1,6 +1,3 @@
-package cs.projects.gameSource;
-
-
 /**
  * A PlayerHandler is the catch all interface for move input on a board. 
  * It is a mixed implementation of strategy and notifier patterns. Each PlayerHandler has its own method for 

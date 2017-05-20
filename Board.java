@@ -1,6 +1,3 @@
-package cs.projects.gameSource;
-
-
 public class Board{
 	
 	/**
@@ -37,34 +34,31 @@ public class Board{
 	
 	public Board(){
 		this.board = new char[8][8];
-		clearBoardToStart();
+		initializeBoard();
 	}
-	
+
 	/**
 	 * Initial starting position of the board
 	 * 
 	 * Resets the board to the default Reversi starting position with white pieces on d4 and e5
 	 * and black pieces on e4 and d5 with all other spaces empty. 
 	 */
-	public void clearBoardToStart(){ 
-		for(int row = 0; row < this.board.length; row++){
-			for(int col = 0; col < this.board[row].length; col++){
+	public void initializeBoard(){ 
+		for(int row = 0; row < this.board.length; row++)
+			for(int col = 0; col < this.board[row].length; col++)
 				if((row == 3 && col == 3) || (row == 4 && col == 4))
 					this.board[row][col] = 'W';
 				else if((row == 3 && col == 4) || (row == 4 && col == 3))
 					this.board[row][col] = 'B';
-				else{
+				else
 					this.board[row][col] = ' ';
-				}
-			}
-		}
 		this.blackScore = 2;
 		this.whiteScore = 2;
 	}
 	
 	/**
-	 * CHANGE TO MOVE CLASS (This is a move characteristic)
-	 * 
+	 * !IMPORTANT! - The main objective is to tell us if any pieces are flipped
+	 *  
 	 * Checks to see if the given move is a valid one. 
 	 * That is:
 	 * 1) The piece to be placed touches other pieces, and
@@ -74,9 +68,9 @@ public class Board{
 	 * @return true if it is a valid move, false otherwise.
 	 */
 	public boolean isValidMove(Move move){
-		if(isPositionEmpty(move.getRowIndex(), move.getColIndex()))
+		if(isPositionEmpty(move.getRowIndex(), move.getColIndex()))//Position is empty
 			for(Direction dir : Direction.values())
-				if(checkInDirection(move.getRowIndex()+dir.rowDir, move.getColIndex()+dir.colDir, move.getPlayerColor(), dir, 0))
+				if(checkInDirection(move.getRowIndex() + dir.rowDir, move.getColIndex() + dir.colDir, move.getPlayerColor(), dir, 0))
 					return true;
 		return false;
 	}
@@ -92,24 +86,39 @@ public class Board{
 		return this.board[row][col] == (' ');
 	}
 	
+	public boolean isWhiteDisk(int row, int col){
+		return this.board[row][col] == ('W');
+	}
+	
+	public boolean isBlackDisk(int row, int col){
+		return this.board[row][col] == ('B');
+	}
+	
 	public boolean isOutOfBounds(int row, int col){
 		return row < 0 || row > 7 || col < 0 || col > 7;
 	}
 	
+	public boolean isFull(){
+		boolean result = true;
+		for(int row = 0; row < this.board.length; row++)
+			for(int col = 0; col < this.board[row].length; col++)
+				if(isPositionEmpty(row, col))
+					result = false;
+		return result;
+	}
+	
 //	public boolean isPositionPlayer(){
 	
-	private boolean checkInDirection(int row, int col, char player, Direction dir, int piecesTurned){
+	private boolean checkInDirection(int row, int col, char playerColor, Direction dir, int piecesTurned){
 		if(isOutOfBounds(row, col) || isPositionEmpty(row, col)) //when outside the board or empty position
 			return false;
-		
-		else if(this.board[row][col] == player){ //arrived player colored disk
-			if(piecesTurned > 0)
+		else if(this.board[row][col] == playerColor) //arrived player colored disk
+			if(piecesTurned > 0) //Touches a player colored disk, and flips some opponent disks, this it is valid
 				return true;
-			else
+			else //Touches a player colored disk, but doesn't flip any opponent disks, then it is invalid
 				return false;
-		}
-		else
-			return checkInDirection(row+dir.rowDir, col+dir.colDir, player, dir, piecesTurned+1);
+		else //If it is an opponent disk, keep going in that direction
+			return checkInDirection(row + dir.rowDir, col + dir.colDir, playerColor, dir, piecesTurned + 1);
 	}
 	
 	/**
@@ -124,30 +133,22 @@ public class Board{
 	 */
 	private void flipPieces(Move move){
 		this.board[move.getRowIndex()][move.getColIndex()] = move.getPlayerColor();
-		switch(move.getPlayerColor()){
-		case 'W':
+		
+		if(move.getPlayerColor() == 'W')
 			whiteScore++;
-			break;
-		case 'B':
+		else if(move.getPlayerColor() == 'B')
 			blackScore++;
-			break;
-		default:
-			System.out.println("ERROR: Player color is not B or W");
-			System.exit(0);
-		}
+		else //Just for safety
+			System.out.println("ERROR: Player color is not Black or White");
+		
 		for(Direction dir : Direction.values()){
-			if(checkInDirection(move.getRowIndex()+dir.rowDir, move.getColIndex()+dir.colDir, move.getPlayerColor(), dir, 0))
-				flipPiecesInDirection(move.getRowIndex()+dir.rowDir, move.getColIndex()+dir.colDir, move.getPlayerColor(), dir);
+			if(checkInDirection(move.getRowIndex() + dir.rowDir, move.getColIndex() + dir.colDir, move.getPlayerColor(), dir, 0))
+				flipPiecesInDirection(move.getRowIndex() + dir.rowDir, move.getColIndex() + dir.colDir, move.getPlayerColor(), dir);
 		}
 	}
 	
 	private void flipPiecesInDirection(int row, int col, char player, Direction dir){
-		if(row < 0 || row > 7 || col < 0 || col > 7){
-		}
-		else if(this.board[row][col] == ' '){
-		}
-		else if(this.board[row][col] == player){
-		}
+		if(isOutOfBounds(row, col) || isPositionEmpty(row, col) || this.board[row][col] == player){}
 		else{
 			this.board[row][col] = player;
 			switch(player){
@@ -175,16 +176,14 @@ public class Board{
 		if(move == null)
 			return false;
 		else if(this.isValidMove(move)){
-			this.flipPieces(move);
-			this.moveRecord[moveIndex] = move;
-			moveIndex++;
+			makeMoveWithoutChecking(move);
 			return true;
 		}
 		else 
 			return false;
 	}
 	
-	public void _makeMoveWithoutChecking(Move move){
+	public void makeMoveWithoutChecking(Move move){
 		this.flipPieces(move);
 		this.moveRecord[moveIndex] = move;
 		moveIndex++;
@@ -209,19 +208,19 @@ public class Board{
 		return this.board[move.getRowIndex()][move.getColIndex()];
 	}
 	
-	public String getScore(){
+	public String getFinalScore(){
 		return "B " + this.blackScore + " - " + this.whiteScore + " W";
 	}
 	
+	/**
+	 * Applies the principles of deep cloning
+	 * @return
+	 */
 	public Board deepCopy(){
-		Board newBoard = new Board();
-		/*for(Move m : moveRecord){
-			if(m != null)
-				newBoard._makeMoveWithoutChecking(m);
-		}*/
+		Board result = new Board();
 		for(int row = 0; row < 8; row++)
 			for(int col = 0; col < 8; col++)
-				newBoard.board[row][col] = this.board[row][col];
-		return newBoard;
+				result.board[row][col] = this.board[row][col];
+		return result;
 	}
 }

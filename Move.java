@@ -1,5 +1,3 @@
-package cs.projects.gameSource;
-
 /**
  * Storage class for a given move in Reversi. Records player color, row position, and columns position.
  * Provides some additional functionality for writing moves in Standard Algebraic Notation (SAN).
@@ -17,12 +15,8 @@ public class Move{
 	 */
 	public Move(String move){
 		this.player = move.charAt(0);
-		
-		this.row = Integer.parseInt(move.substring(2));
-		this.row--;
-		
-		this.col = move.charAt(1);
-		this.col -= 97;
+		this.row = Integer.parseInt(move.substring(2)) - 1;		
+		this.col = move.charAt(1) - 97;
 	}
 	
 	/**
@@ -83,7 +77,11 @@ public class Move{
 	public char getPlayerColor(){
 		return this.player;
 	}
-
+	
+	public boolean isOutOfBounds(int row, int col){
+		return row < 0 || row > 7 || col < 0 || col > 7;
+	}
+	
 	/**
 	 * Returns the move in Standard Algebraic Notation (SAN). SAN is player color + column letter + row number.
 	 */

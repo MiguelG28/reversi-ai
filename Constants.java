@@ -1,6 +1,3 @@
-package cs.projects.gameSource;
-
-
 public class Constants{
 	
 	public static final char[] COLUMN_LETTERS = {'a','b','c','d','e','f','g','h'};
@@ -9,6 +6,6 @@ public class Constants{
 	public static final int NUM_ROWS = 8;
 	
 	public static enum Player{
-		MANUAL, GREEDY, MINIMAX, MONTECARLO
+		MANUAL, MONTECARLO
 	}
 }

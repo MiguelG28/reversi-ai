@@ -1,7 +1,4 @@
-package cs.projects.gameSource;
-
 public class ManualPlayer implements PlayerHandler{
-
 	Board gameBoard;
 	String playerColor;
 	MoveReader reader;
@@ -14,6 +11,8 @@ public class ManualPlayer implements PlayerHandler{
 	@Override
 	public Move getMove() {
 		Move move = reader.getMove(playerColor);
+		if(gameBoard.isFull())
+			return null;
 		while(!gameBoard.isValidMove(move)){
 			System.out.println("ERROR: NOT A LEGAL MOVE");
 			move = reader.getMove(playerColor);
